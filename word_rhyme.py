@@ -8,7 +8,10 @@ def line_parse(line):
   py         = pinyin.word2pinyin(word)
   word_cnt   = len(py.split())
   last_py    = py.split()[-1].strip()
-  rhyme      = last_py[2:-1] if last_py[:2] in 'zh,ch,sh' else last_py[1:-1]
+  if (last_py[0] in 'aoeiuv'):
+    rhyme      = last_py[:-1] 
+  else:
+    rhyme      = last_py[2:-1] if last_py[:2] in 'zh,ch,sh' else last_py[1:-1]
   #print word
   return word,rhyme,word_cnt
 def word_rhyme(debug_on=0):
