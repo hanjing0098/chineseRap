@@ -14,25 +14,27 @@ def line_parse(line):
     rhyme      = last_py[2:-1] if last_py[:2] in 'zh,ch,sh' else last_py[1:-1]
   #print word
   return word,rhyme,word_cnt
-def word_rhyme(debug_on=0):
+def word_rhyme(strict_rhyme_en=0,debug_on=0):
   with open(word_lib) as wl:
-    lines_1 = [x for x in wl.readlines()]
-    lines_2 = lines_1
-    for line_src in lines_1: 
-      word_src, rhyme_src, word_cnt_src = line_parse(line_src)
+    lines = [x for x in wl.readlines()]
+    for line in lines:
+      word, rhyme, word_cnt = line_parse(line)
+      if (strict_rhyme_en == 0):
+        key = str(rhyme) 
+      else:
+        key = str(rhyme) + str(word_cnt) 
       if (debug_on == 1):
-        print 'word_src:%s, word_rhyme:%s, word_cnt:%d ' %(str(word_src),str(rhyme_src),word_cnt_src)
-      word_rhyme_dict[str(word_src)]= []
-      for line_tar in lines_2:
-        word_tar, rhyme_tar, word_cnt_tar= line_parse(line_tar)
-        if (debug_on == 1):
-          print 'word_tar:%s, word_rhyme:%s ' %(str(word_tar),str(rhyme_tar))
-        if rhyme_src == rhyme_tar and word_cnt_src == word_cnt_tar and word_src != word_tar:
-          word_rhyme_dict[str(word_src)].append(word_tar)
-      print '%s\t'%word_src,
-      for i in word_rhyme_dict[str(word_src)]:
-        print "%s"%i, 
-      print '\n'
+        print 'word:%s, word_rhyme:%s, word_cnt:%d ' %(str(word),str(rhyme),word_cnt)
+      if word_rhyme_dict.has_key(key):
+        word_rhyme_dict[key].append(word) 
+      else:
+        word_rhyme_dict[key] = []
+        word_rhyme_dict[key].append(word) 
+  for rhyme,list_word in word_rhyme_dict.items():
+    print '%s\t'%rhyme,
+    for word in list_word:
+      print word,
+    print '\n'
 
 if __name__=='__main__':
-  word_rhyme()
+  word_rhyme(0)
