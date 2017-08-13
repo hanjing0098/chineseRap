@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import word2pinyin as pinyin
 
-word_lib = './vocabulary_library/THUOCL_car.txt'
+word_lib = './vocabulary_library/test.txt'
 word_rhyme_dict = {}
 def line_parse(line):
   word       = line.split('\t')[0].strip()
@@ -26,10 +26,10 @@ def word_rhyme(debug_on=0):
           print 'word_tar:%s, word_rhyme:%s ' %(str(word_tar),str(rhyme_tar))
         if rhyme_src == rhyme_tar and word_cnt_src == word_cnt_tar and word_src != word_tar:
           word_rhyme_dict[str(word_src)].append(word_tar)
-      #print '%s\t'%word_src,
-      #for i in word_rhyme_dict[str(word_src)]:
-      #  print "%s"%i, 
-      #print '\n'
+      print '%s\t'%word_src,
+      for i in word_rhyme_dict[str(word_src)]:
+        print "%s"%i, 
+      print '\n'
 
 if __name__=='__main__':
   word_rhyme()
