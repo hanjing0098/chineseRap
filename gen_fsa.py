@@ -105,36 +105,97 @@ def line_process(vocb_l, rhym_l, double_rhym_l, line_index_str, word_num_line, a
       for trans_word in vocb_l:
         vari_word_len_handle(word_num_line, line_index_str, word_index, trans_word, alliter_en, rhym_key)
   state_trans_print('L%sW%s'%(line_index_str, word_num_str),'L%sEND'%line_index_str, '*e*')
-        
-def gen_fsa(vocb_l, line_num=4, word_num=7, alliter_en=0, doublebet_en=0, fix_word_num=1, variance=2):
+
+def rhym_select(doublebet_en, rhym_vocb, double_rhym_vocb, line_num):      
+  if (doublebet_en == 1):
+    if (double_rhym_vocb is None):
+      #double_rhym_l = [] 
+      dbet_en = 0
+      rhym_key_a, rhym_a  = find_rhyme(rhym_vocb, line_num) 
+      double_rhym_a       = rhym_a
+      rhym_vocb.pop(rhym_key_a,None)
+      rhym_key_b, rhym_b  = find_rhyme(rhym_vocb, line_num) 
+      double_rhym_b       = rhym_b
+      print 'Warning: there is no double rhyme word related to topic word'
+    else:
+      dbet_en = 1
+      rhym_key_a, double_rhym_a  = find_rhyme(double_rhym_vocb,line_num) 
+      rhym_a                     = rhym_vocb[rhym_key_a]
+      double_rhym_vocb.pop(rhym_key_a,None)
+      if (double_rhym_vocb is None):
+        print 'Warning: there is not enough double rhyme word related to topic word, let b=a'
+        rhym_key_b    = rhym_key_a
+        rhym_b        = rhym_a
+        double_rhym_b = double_rhym_a
+      else:
+        rhym_key_b, double_rhym_b  = find_rhyme(double_rhym_vocb,line_num) 
+        rhym_b                     = rhym_vocb[rhym_key_b]
+  else: 
+    dbet_en = 0
+    double_rhym_a = [] 
+    double_rhym_b = [] 
+    rhym_key_a, rhym_a  = find_rhyme(rhym_vocb,line_num) 
+    rhym_vocb.pop(rhym_key_a,None)
+    rhym_key_b, rhym_b  = find_rhyme(rhym_vocb, line_num) 
+  
+  return dbet_en, rhym_key_a, rhym_a, double_rhym_a, rhym_key_b, rhym_b, double_rhym_b 
+def gen_fsa(vocb_l, mode=0, line_num=4, word_num=7, alliter_en=0, doublebet_en=0, fix_word_num=1, variance=2):
+  """
+  Args:
+    vocb_l: related word vocabulary
+    mode  : rap mode, 0->aaaa; 1->abab; 2->aabb
+    line_num: expected line_num in each paragraph
+    aliter_en: 0->disable; 1->enable
+    doublebet_en: 0-> 单押; 1->双押
+  """
+  if (mode >= 3):
+    print 'mode should less than 3: 0-> aaaa; 1-> abab; 2-> aabb'
+    raise ValueError
   #get rhym list
   double_rhym_l = [] 
   rhym_l        = [] 
   rhym_vocb, double_rhym_vocb = rhyme.word_rhyme(vocb_l)
-  if (doublebet_en == 1):
-    if (double_rhym_vocb is None):
-      double_rhym_l = [] 
-      dbet_en = 0
-      rhym_key, rhym_l  = find_rhyme(rhym_vocb, line_num) 
-      print 'Warning: there is no double rhyme word related to topic word'
-    else:
-      dbet_en = 1
-      rhym_key, double_rhym_l  = find_rhyme(double_rhym_vocb,line_num) 
-      rhym_l                   = rhym_vocb[rhym_key]
-  else: 
-    rhym_key, rhym_l           = find_rhyme(rhym_vocb,line_num) 
-    dbet_en = 0
+
+  dbet_en, rhym_key_a, rhym_a, double_rhym_a, rhym_key_b, rhym_b, double_rhym_b = rhym_select(doublebet_en, rhym_vocb, double_rhym_vocb, line_num)
+
   #gen end state
   print 'END'
   #START -> L00START
   state_trans_print('START','L00START','Rap:')
   #gen each line
+  rhym_cnt = 0
   for line_index in range(line_num):
+    if (rhym_cnt == 3):
+      rhym_cnt = 0
+    else:
+      rhym_cnt = rhym_cnt + 1
     line_index_str = index2str(line_index)
     if (fix_word_num == 1):
       word_num_line = word_num
     else:
       word_num_line = random.randint(word_num-variance,word_num+variance)
+    if (mode == 0): ##aaaa
+      doublt_rhym_l   = double_rhym_a
+      rhym_l          = rhym_a
+      rhym_key        = rhym_key_a 
+    elif (mode == 1): ##abab
+      if (line_index % 2 == 0):
+        doublt_rhym_l   = double_rhym_a
+        rhym_l          = rhym_a
+        rhym_key        = rhym_key_a 
+      else:
+        doublt_rhym_l   = double_rhym_b
+        rhym_l          = rhym_b
+        rhym_key        = rhym_key_b 
+    elif (mode == 2): ##aabb
+      if (rhym_cnt < 2):
+        doublt_rhym_l   = double_rhym_a
+        rhym_l          = rhym_a
+        rhym_key        = rhym_key_a 
+      else:
+        doublt_rhym_l   = double_rhym_b
+        rhym_l          = rhym_b
+        rhym_key        = rhym_key_b 
     line_process(vocb_l, rhym_l, double_rhym_l, line_index_str, word_num_line, alliter_en, dbet_en,rhym_key)
     #line->line
     if (line_index == (line_num - 1)):
