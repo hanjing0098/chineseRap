@@ -2,7 +2,7 @@
 import sys
 import random
 import word_rhyme as rhyme
-
+global out
 def vocb2word(vocb_l):
   word_dict = {}
   v_cnt     = 0
@@ -26,7 +26,9 @@ def find_rhyme(rhym_vocb, line_num):
   return key_select, rhym_vocb[key_select] 
 
 def state_trans_print(src_state,tar_state,word):
-  print '(%s (%s %s))'%(src_state,tar_state,word)
+  #print '(%s (%s %s))'%(src_state,tar_state,word)
+  global out
+  out.write('(%s (%s %s))'%(src_state,tar_state,word) + '\n')
 
 def index2str(index):
   if (index > 9):
@@ -139,7 +141,7 @@ def rhym_select(doublebet_en, rhym_vocb, double_rhym_vocb, line_num):
     rhym_key_b, rhym_b  = find_rhyme(rhym_vocb, line_num) 
   
   return dbet_en, rhym_key_a, rhym_a, double_rhym_a, rhym_key_b, rhym_b, double_rhym_b 
-def gen_fsa(vocb_l, mode=0, line_num=4, word_num=7, alliter_en=0, doublebet_en=0, fix_word_num=1, variance=2):
+def gen_fsa(vocb_l, output, mode=0, line_num=4, word_num=7, alliter_en=0, doublebet_en=0, fix_word_num=1, variance=2):
   """
   Args:
     vocb_l: related word vocabulary
@@ -148,9 +150,11 @@ def gen_fsa(vocb_l, mode=0, line_num=4, word_num=7, alliter_en=0, doublebet_en=0
     aliter_en: 0->disable; 1->enable
     doublebet_en: 0-> 单押; 1->双押
   """
+  global out
   if (mode >= 3):
     print 'mode should less than 3: 0-> aaaa; 1-> abab; 2-> aabb'
     raise ValueError
+  out = open(output, 'w')
   #get rhym list
   double_rhym_l = [] 
   rhym_l        = [] 
@@ -159,7 +163,8 @@ def gen_fsa(vocb_l, mode=0, line_num=4, word_num=7, alliter_en=0, doublebet_en=0
   dbet_en, rhym_key_a, rhym_a, double_rhym_a, rhym_key_b, rhym_b, double_rhym_b = rhym_select(doublebet_en, rhym_vocb, double_rhym_vocb, line_num)
 
   #gen end state
-  print 'END'
+  #print 'END'
+  out.write('END')
   #START -> L00START
   state_trans_print('START','L00START','Rap:')
   #gen each line
@@ -202,6 +207,7 @@ def gen_fsa(vocb_l, mode=0, line_num=4, word_num=7, alliter_en=0, doublebet_en=0
       state_trans_print('L%sEND'%line_index_str,'END','.')
     else:
       state_trans_print('L%sEND'%line_index_str,'L%sSTART'%index2str(line_index+1),';')
+  out.close()
       
 if __name__=='__main__':
   l = ['你好','嘻嘻','哈哈','笑笑','下雨','米采奕奕'] 

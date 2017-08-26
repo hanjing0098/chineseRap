@@ -16,4 +16,4 @@ if __name__=='__main__':
     line = f.readline()
   f.close()
   #print vocab_l
-  fsa.gen_fsa(vocab_l,2,4,0,0)
+  fsa.gen_fsa(vocab_l,"fsa.loog",2,4,4,0,0)
