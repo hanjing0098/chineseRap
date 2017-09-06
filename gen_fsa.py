@@ -164,7 +164,7 @@ def gen_fsa(vocb_l, output, mode=0, line_num=4, word_num=7, alliter_en=0, double
 
   #gen end state
   #print 'END'
-  out.write('END')
+  out.write('END \n')
   #START -> L00START
   state_trans_print('START','L00START','Rap:')
   #gen each line
