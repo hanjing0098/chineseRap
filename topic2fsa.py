@@ -5,11 +5,6 @@ import gensim
 import gen_fsa as fsa
 import argparse
 
-def is_chinese(word):
-  if word >= u'\u4e00' and word <= u'\u9f5a':
-    return True
-  else:
-    return False
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-m","--mode", type = int, default=0, help="rhym mode selection -m/--mode=0(1,2)")
@@ -21,16 +16,36 @@ parser.add_argument("-t","--topic", default='默认', help="specify the topic wo
 parser.add_argument("-o","--filename", default='rap.fsa',  help="specify the fsa output file -o/-filename filename")
 args = parser.parse_args()
 
+def is_chinese(word):
+  if word >= u'\u4e00' and word <= u'\u9f5a':
+    return True
+  else:
+    return False
+
+def load_vocb():
+  vocab_f   = open('vocab.txt', 'r')
+  vocab_all = []
+  for line in vocab_f.readlines():
+    word = line.strip()
+    if (word != '') and is_chinese(word[-1]):
+      vocab_all.append(word)
+  return  vocab_all
+  vocab_f.close()
+      
+
 if __name__=='__main__':
-  vocab_l = []
+  vocab_l   = []
+  vocab_all = []
   #f = codecs.open('test_fsa.txt', 'r', encoding='utf-8')
+  vocab_all = load_vocb() 
   word = args.topic
   print 'topic: '+word
   model = gensim.models.Word2Vec.load('../../model/wiki.zh.model')
   #print 'model load successfully! ...'
   result = model.most_similar(args.topic.decode('utf-8'),[],1000)
   for x in result:
-    if (x[0].strip() != '') and (is_chinese(x[0])):
-      vocab_l.append(x[0].strip().encode('utf-8'))
+    if (x[0].strip() != '') and (is_chinese(x[0][-1])):
+      if (x[0] in vocab_all):
+        vocab_l.append(x[0].strip().encode('utf-8'))
   #print vocab_l
-  fsa.gen_fsa(vocab_l, args.filename, args.mode, args.linenum, args.wordnum, args.alli, args.doublerhyme)
+  fsa.gen_fsa(vocab_l, vocab_all, args.filename, 'source.txt', args.mode, args.linenum, args.wordnum, args.alli, args.doublerhyme)
