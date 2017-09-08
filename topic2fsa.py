@@ -17,18 +17,19 @@ parser.add_argument("-o","--filename", default='rap.fsa',  help="specify the fsa
 args = parser.parse_args()
 
 def is_chinese(word):
-  if word >= u'\u4e00' and word <= u'\u9f5a':
-    return True
-  else:
-    return False
+  for _word in word:
+    if _word >= u'\u4e00' and _word <= u'\u9f5a':
+      return True
+    else:
+      return False
 
 def load_vocb():
   vocab_f   = open('vocab.txt', 'r')
   vocab_all = []
   for line in vocab_f.readlines():
-    word = line.strip()
-    if (word != '') and is_chinese(word[-1]):
-      vocab_all.append(word)
+    word = line.strip().decode('utf-8')
+    if (word != '') and is_chinese(word):
+      vocab_all.append(word.encode('utf-8'))
   return  vocab_all
   vocab_f.close()
       
@@ -44,8 +45,9 @@ if __name__=='__main__':
   #print 'model load successfully! ...'
   result = model.most_similar(args.topic.decode('utf-8'),[],1000)
   for x in result:
-    if (x[0].strip() != '') and (is_chinese(x[0][-1])):
-      if (x[0] in vocab_all):
-        vocab_l.append(x[0].strip().encode('utf-8'))
+    if (x[0].strip() != '') and (is_chinese(x[0])):
+      rhym_word = x[0].strip().encode('utf-8')
+      if (rhym_word in vocab_all):
+        vocab_l.append(rhym_word)
   #print vocab_l
   fsa.gen_fsa(vocab_l, vocab_all, args.filename, 'source.txt', args.mode, args.linenum, args.wordnum, args.alli, args.doublerhyme)
