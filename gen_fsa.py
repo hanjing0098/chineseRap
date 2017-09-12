@@ -167,7 +167,7 @@ def gen_fsa(vocb_topic, vocb_all, output, source_file, mode=0, line_num=4, word_
   #print 'END'
   out.write('END \n')
   #START -> L00START
-  state_trans_print('START','L00START','Rap:')
+  state_trans_print('START','L00START','*e*')
   #gen each line
   rhym_cnt = 0
   for line_index in range(line_num):
@@ -211,7 +211,7 @@ def gen_fsa(vocb_topic, vocb_all, output, source_file, mode=0, line_num=4, word_
     if (line_index == (line_num - 1)):
       state_trans_print('L%sEND'%line_index_str,'END','.')
     else:
-      state_trans_print('L%sEND'%line_index_str,'L%sSTART'%index2str(line_index+1),';')
+      state_trans_print('L%sEND'%line_index_str,'L%sSTART'%index2str(line_index+1),',')
   out.close()
   src.close()
       
